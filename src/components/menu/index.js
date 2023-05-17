@@ -3,6 +3,7 @@ import {faCamera, faClockRotateLeft, faCrop} from '@fortawesome/free-solid-svg-i
 import {Layout, Menu, theme} from 'antd';
 import {useState} from 'react';
 import './menu.css'
+import UploadForm from "../upload_form";
 
 const {Header, Content, Footer, Sider} = Layout;
 
@@ -21,6 +22,11 @@ const items = [
     getItem('历史识别', 'history', <FontAwesomeIcon icon={faClockRotateLeft} />),
 ];
 const MenuSide = () => {
+    const [current, setCurrent] = useState('mine');
+    const onClick = (e) => {
+        console.log('click ', e);
+        setCurrent(e.key);
+    };
     const [collapsed, setCollapsed] = useState(false);
     const {
         token: {colorBgContainer},
@@ -35,10 +41,11 @@ const MenuSide = () => {
                 <div className="demo-logo-vertical">
                     {/*logo*/}
                 </div>
-                <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items}/>
+                <Menu theme="dark" defaultSelectedKeys={['crop']} onClick={onClick} selectedKeys={{current}} mode="inline" items={items}/>
             </Sider>
             <Layout>
                 <Content
+                    key={'crop'}
                     style={{
                         margin: 0,
                     }}
@@ -49,7 +56,9 @@ const MenuSide = () => {
                             background: colorBgContainer,
                         }}
                     />
-                    this is content
+                    {current === 'crop' && <UploadForm/>}
+                    {current === 'OCR' && <div>OCR</div>}
+                    {current === 'history' && <div>history</div>}
                 </Content>
                 <Footer
                     style={{
