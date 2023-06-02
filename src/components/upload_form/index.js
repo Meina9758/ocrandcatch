@@ -1,38 +1,58 @@
-import React, { useState } from 'react';
+import {InboxOutlined} from '@ant-design/icons';
+import {message, Upload} from 'antd';
 import axios from 'axios';
+import './upload_form.css';
+import Picselect from "../picselect";
+
+const {Dragger} = Upload;
 
 const UploadForm = () => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [uploadStatus, setUploadStatus] = useState('');
+    const handleUpload = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
+        try {
+            const response = await axios.post('http://localhost:5000/upload_cut', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // 根据接口返回的响应进行处理
+            if (response.data.success) {
+                message.success(`${file.name} file uploaded successfully.`);
+            } else {
+                message.error(`${file.name} file upload failed.`);
+            }
+        } catch (error) {
+            message.error(`${file.name} file upload failed.`);
+        }
     };
 
-    const handleFormSubmit = (event) => {
-        event.preventDefault();
-
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-
-        axios.post('http://localhost:5000/upload', formData)
-            .then((response) => {
-                setUploadStatus(response.data.message);
-            })
-            .catch((error) => {
-                setUploadStatus('Error occurred during upload');
-                console.error(error);
-            });
+    const props = {
+        name: 'file',
+        multiple: true,
+        showUploadList: false,
+        beforeUpload: handleUpload,
     };
 
     return (
-        <div>
-            <h2>Image Upload</h2>
-            <form onSubmit={handleFormSubmit}>
-                <input type="file" accept="image/*" onChange={handleFileChange} />
-                <button type="submit">Upload</button>
-            </form>
-            <p>{uploadStatus}</p>
+        <div className="upload">
+            <div className="upload-box">
+                <Dragger {...props}>
+                    <p className="ant-upload-drag-icon">
+                        <InboxOutlined/>
+                    </p>
+                    <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                    <p className="ant-upload-hint">
+                        Support for a single or bulk upload. Strictly prohibited from uploading company data or other
+                        banned files.
+                    </p>
+                </Dragger>
+            </div>
+            <div className="upload-box">
+                <Picselect loadlink={'http://localhost:5000/api/images'}/>
+            </div>
         </div>
     );
 };
